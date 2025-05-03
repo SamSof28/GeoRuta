@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>GeoRuta - Rutas Óptimos del Campus</title>
+  <link rel="website icon" type="png" href="assets/img/Logo.png">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <!-- Estilos propios -->
+  <link rel="stylesheet" href="style/index.css">
+  <!-- Iconos de Leaflet Mejorados -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.4/leaflet.awesome-markers.css"/>
+</head>
+<body>
+  <header>
+    <h1>GeoRuta</h1>
+    <p>Rutas óptimas y seguras dentro del campus UdeM</p>
+  </header>
+
+  <div class="container">
+    <!-- Panel lateral de controles -->
+    <aside class="sidebar">
+      <h2>Controles</h2>
+      <div class="form-group">
+        <label for="origen">Origen:</label>
+        <select id="origen"></select>
+      </div>
+      <div class="form-group">
+        <label for="destino">Destino:</label>
+        <select id="destino"></select>
+      </div>
+      <button id="btnCalcular">Calcular ruta</button>
+      <div class="result-panel">
+        <h3>Datos Geométricos</h3>
+        <p id="distancia"></p>
+        <p id="vector"></p>
+        <p id="angulo"></p>
+      </div>
+    </aside>
+
+    <!-- Mapa interactivo -->
+    <main class="map-container">
+      <div id="map"></div>
+    </main>
+  </div>
+
+  <!-- Leaflet JS y AwesomeMarkers -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.4/leaflet.awesome-markers.js"></script>
+  <!-- Lógica de la app -->
+  <script src="js/app.js"></script>
+</body>
+</html>
