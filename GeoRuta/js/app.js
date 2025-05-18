@@ -13,6 +13,9 @@ L.control.zoom({ position: 'topright' }).addTo(map);
 L.control.scale({ position: 'bottomleft', metric: true, imperial: false }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
+// Mostrar latitud y longitud al hacer clic en el mapa
+map.on("click", e => console.log(e.latlng));
+
 // Puntos del campus con coordenadas [lat, lng]
 const puntos = {
   "Coliseo - Bloque 1": [6.230708 , -75.610330],
@@ -40,6 +43,8 @@ const puntos = {
 const nodos = {
   A: [6.230708 , -75.610330],  // Coliseo - Bloque 1
   B: [6.230690 , -75.610671],  // Bienestar - Bloque 2
+  X1: [6.230773616363773, -75.61053872108461], // Intersección 1
+  X2: [6.23080294637473, -75.6106460094452],  // Intersección 2
   C: [6.230239 , -75.611631],  // Centro de laboratorios - Bloque 3
   D: [6.230281 , -75.611974],  // Bloque de Ingenierías - Bloque 4
   E: [6.230601 , -75.612170],  // Ciencias Básicas - Bloque 5
@@ -58,9 +63,47 @@ const nodos = {
   R: [6.232436 , -75.610331],  // Derecho - Bloque 16
   S: [6.232804 , -75.610387],  // Teatro - Bloque 17
   T: [6.232695 , -75.611168],  // Administrativo - Bloque 18
-
-  //Intersecciones entre bloques
-  X1: [6.230782 , -75.610538] //Interseccion entre Bloque 1 a Bloque 2
+  X3: [6.23078161545783, -75.61054140329362],
+  X4: [6.230440320669506, -75.61059504747392],
+  X5: [6.230373661505254, -75.61063259840013],
+  X6: [6.230536309851165, -75.61183154582979],
+  X7: [6.23027767229385, -75.61188519001009],
+  X8: [6.23024834225353, -75.61166793107988],
+  Y1: [6.230805612739288, -75.6106460094452],
+  Y2: [6.230786948187138, -75.61054408550264],
+  Y3: [6.230456318867658, -75.61058968305589],
+  Y4: [6.230376327871988, -75.61063259840013],
+  Y5: [6.230536309851165, -75.61183691024782],
+  Y6: [6.230272339559377, -75.61187982559204],
+  Z1: [6.23078161545783, -75.61054140329362],
+  Z2: [6.230442987035909, -75.61059772968294],
+  Z3: [6.230376327871988, -75.61063528060915],
+  Z4: [6.230528310753355, -75.61184227466585],
+  Z5: [6.230283005028272, -75.6118878722191],
+  W1: [6.230805612739288, -75.61064332723619],
+  W2: [6.230786948187138, -75.61054408550264],
+  W3: [6.230442987035909, -75.61060309410097],
+  W4: [6.230370995138507, -75.6106299161911],
+  W5: [6.2305336434852325, -75.61183959245683],
+  W6: [6.23027500592662, -75.61187982559204],
+  U1: [6.230301669598349, -75.61209976673128],
+  U2: [6.23059230353235, -75.61205416917802],
+  V1: [6.23027500592662, -75.61188250780107],
+  V2: [6.2303070023325295, -75.61209708452226],
+  V3: [6.230586970801057, -75.61205416917802],
+  W7: [6.230309668699607, -75.61209708452226],
+  W8: [6.23058963716671, -75.61205416917802],
+  Q1: [6.23059230353235, -75.61205953359605],
+  Q2: [6.230570972606888, -75.61205685138702],
+  Q3: [6.230370995138507, -75.61063796281816],
+  Q4: [6.230429655203792, -75.6105923652649],
+  Q5: [6.23078428182249, -75.61053872108461],
+  P1: [6.230598954156448, -75.61205811266895],
+  P2: [6.230572290499821, -75.61206079487793],
+  P3: [6.230369646665203, -75.61064190630908],
+  P4: [6.230422973997693, -75.61058826212877],
+  P5: [6.230785599714902, -75.61053998236652],
+  P6: [6.23080426426709, -75.6106472707271],
 };
   
   // 2. Aristas: para cada nodo, lista de [nodoVecino, distancia_meters]
@@ -82,19 +125,66 @@ const grafo = {
   J: [["L", null], ["K", null]],               // Bloque9 ↔ Bloque10
   K: [["J", null]],                            // Bloque10
   
-  // Corredor sur:
-  C: [["I", null]],       // Laboratorios ↔ Junín
-  I: [["C", null], ["B", null]], // Junín ↔ Bloque3·Bloque2
-  B: [["I", null], ["A", null]], // Bloque2 ↔ Bloque1
-  A: [["B", null]],       // Bloque1
-  
-  // Y ahora conecta sur → central:
-  C: [["D", null]],       // Laboratorios ↔ Bloque4 (vertical de unión)
-  D: [["C", null], ["E", null]], // Bloque4 ↔ Bloque3·Bloque5
-  E: [["D", null], ["F", null]], // Bloque5 ↔ Bloque6
+  // Corredor sur actualizado:
+  A: [["X1", null], ["X3", null], ["Z1", null], ["Q5", null]],       // Coliseo → Intersección 1, Intersección 3, Z1, Q5
+  X1: [["A", null], ["X2", null]], // Intersección 1 ↔ Coliseo, Intersección 2
+  X2: [["X1", null], ["B", null]], // Intersección 2 ↔ Intersección 1, Bienestar
+  B: [["X2", null], ["I", null], ["Y1", null], ["W1", null], ["P6", null]], // Bienestar ↔ Intersección 2, Junín, Y1, W1
+  // Camino peatonal de A a C:
+  X3: [["A", null], ["X4", null]],
+  X4: [["X3", null], ["X5", null]],
+  X5: [["X4", null], ["X6", null]],
+  X6: [["X5", null], ["X7", null]],
+  X7: [["X6", null], ["X8", null]],
+  X8: [["X7", null], ["C", null]],
+  C: [["X8", null], ["I", null], ["D", null], ["Y6", null], ["V1", null]], // Laboratorios ↔ X8, Junín, Bloque4, Y6, V1
+  D: [["C", null], ["Z5", null], ["W6", null], ["U1", null], ["W7", null]], // Bloque4 ↔ Laboratorios, Z5, W6, U1, W7
+  E: [["F", null], ["U2", null], ["V3", null], ["W8", null], ["Q1", null], ["P1", null]], // Bloque5 ↔ Bloque4, Bloque6, U2, C, V3, W8, Q1
   F: [["E", null], ["G", null]], // Bloque6 ↔ Bloque7
   G: [["F", null], ["H", null]], // Bloque7 ↔ Cancha
-  H: [["G", null]]               // Cancha
+  H: [["G", null]],               // Cancha
+  // Camino peatonal exclusivo de B a C:
+  Y1: [["B", null], ["Y2", null]],
+  Y2: [["Y1", null], ["Y3", null]],
+  Y3: [["Y2", null], ["Y4", null]],
+  Y4: [["Y3", null], ["Y5", null]],
+  Y5: [["Y4", null], ["Y6", null]],
+  Y6: [["Y5", null], ["C", null]],
+  // Camino peatonal exclusivo de A a D:
+  Z1: [["A", null], ["Z2", null]],
+  Z2: [["Z1", null], ["Z3", null]],
+  Z3: [["Z2", null], ["Z4", null]],
+  Z4: [["Z3", null], ["Z5", null]],
+  Z5: [["Z4", null], ["D", null]],
+  // Camino peatonal exclusivo de B a D:
+  W1: [["B", null], ["W2", null]],
+  W2: [["W1", null], ["W3", null]],
+  W3: [["W2", null], ["W4", null]],
+  W4: [["W3", null], ["W5", null]],
+  W5: [["W4", null], ["W6", null]],
+  W6: [["W5", null], ["D", null]],
+  // Camino peatonal exclusivo de D a E y de C a E:
+  U1: [["D", null], ["U2", null]],
+  U2: [["U1", null], ["E", null]],
+  // Camino peatonal exclusivo de C a E:
+  V1: [["C", null], ["V2", null]],
+  V2: [["V1", null], ["V3", null]],
+  V3: [["V2", null], ["E", null]],
+  W7: [["D", null], ["W8", null]],
+  W8: [["W7", null], ["E", null]],
+  // Camino peatonal exclusivo de E a A:
+  Q1: [["E", null], ["Q2", null]],
+  Q2: [["Q1", null], ["Q3", null]],
+  Q3: [["Q2", null], ["Q4", null]],
+  Q4: [["Q3", null], ["Q5", null]],
+  Q5: [["Q4", null], ["A", null]],
+  // Camino peatonal exclusivo de E a B:
+  P1: [["E", null], ["P2", null]],
+  P2: [["P1", null], ["P3", null]],
+  P3: [["P2", null], ["P4", null]],
+  P4: [["P3", null], ["P5", null]],
+  P5: [["P4", null], ["P6", null]],
+  P6: [["P5", null], ["B", null]],
 };
   
 // 3. Calcular y rellenar distancias automáticamente
